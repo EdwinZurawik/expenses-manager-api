@@ -1,0 +1,19 @@
+{
+  "name": "expenses-manager-api",
+  "version": "1.0.0",
+  "description": "Backend for expenses manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EdwinZurawik/expenses-manager-api.git"
+  },
+  "author": "Edwin Żurawik",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EdwinZurawik/expenses-manager-api/issues"
+  },
+  "homepage": "https://github.com/EdwinZurawik/expenses-manager-api#readme"
+}
