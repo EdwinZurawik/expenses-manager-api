@@ -1,29 +1,31 @@
 const fs = require('fs');
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
 
+app.use(morgan('dev'));
 app.use(express.json());
 
-const expenses = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/expenses.json`)
+const transactions = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/transactions.json`)
 );
 
-app.get('/api/v1/expenses', (req, res) => {
+const getAllTransactions = (req, res) => {
   res.status(200).json({
     status: 'success',
-    results: expenses.length,
+    results: transactions.length,
     data: {
-      expenses,
+      transactions,
     },
   });
-});
+};
 
-app.get('/api/v1/expenses/:id', (req, res) => {
+const getTransaction = (req, res) => {
   const id = +req.params.id;
-  expense = expenses.find((el) => el.id === id);
+  transaction = transactions.find((el) => el.id === id);
 
-  if (!expense) {
+  if (!transaction) {
     res.status(404).json({
       status: 'fail',
       message: 'Invalid ID',
@@ -32,33 +34,33 @@ app.get('/api/v1/expenses/:id', (req, res) => {
     res.status(200).json({
       status: 'success',
       data: {
-        expense,
+        transaction,
       },
     });
   }
-});
+};
 
-app.post('/api/v1/expenses', (req, res) => {
+const createTransaction = (req, res) => {
   console.log(req.body);
-  const expenseId = expenses[expenses.length - 1].id + 1;
-  const newExpense = Object.assign({ id: expenseId }, req.body);
+  const transactionId = transactions[transactions.length - 1].id + 1;
+  const newTransaction = Object.assign({ id: transactionId }, req.body);
 
-  expenses.push(newExpense);
+  transactions.push(newTransaction);
   fs.writeFile(
-    `${__dirname}/dev-data/expenses.json`,
-    JSON.stringify(expenses),
+    `${__dirname}/dev-data/transactions.json`,
+    JSON.stringify(transactions),
     (err) => {
       res.status(201).json({
         status: 'success',
         data: {
-          expense: newExpense,
+          transaction: newTransaction,
         },
       });
     }
   );
-});
+};
 
-app.patch('/api/v1/expenses/:id', (req, res) => {
+const updateTransaction = (req, res) => {
   // Check if tour with given id exists...
   res.status(200).json({
     status: 'success',
@@ -66,15 +68,21 @@ app.patch('/api/v1/expenses/:id', (req, res) => {
       tour: 'Updated tour here!',
     },
   });
-});
+};
 
-app.delete('/api/v1/expenses/:id', (req, res) => {
+const deleteTransaction = (req, res) => {
   // Check if tour with given id exists...
   res.status(204).json({
     status: 'success',
     data: null,
   });
-});
+};
+
+app.get('/api/v1/transactions', getAllTransactions);
+app.get('/api/v1/transactions/:id', getTransaction);
+app.post('/api/v1/transactions', createTransaction);
+app.patch('/api/v1/transactions/:id', updateTransaction);
+app.delete('/api/v1/transactions/:id', deleteTransaction);
 
 port = 3000;
 app.listen(port, () => {
