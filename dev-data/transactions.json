@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "type": "expense",
+    "name": "Biedronka",
+    "amount": 5.49,
+    "userId": "1",
+    "categoryId": "1",
+    "date": "2021-11-11,10:00"
+  },
+  {
+    "id": 2,
+    "type": "expense",
+    "name": "McDonald's",
+    "amount": 10,
+    "userId": "2",
+    "categoryId": "1",
+    "date": "2021-10-01,10:00"
+  },
+  {
+    "id": 3,
+    "type": "income",
+    "name": "Prezent",
+    "amount": 100,
+    "userId": "1",
+    "categoryId": "4",
+    "date": "2021-11-12,10:00"
+  },
+  {
+    "id": 4,
+    "type": "expense",
+    "name": "Lidl",
+    "amount": 48.55,
+    "userId": "1",
+    "categoryId": "1",
+    "date": "2021-11-13,10:00"
+  },
+  {
+    "id": 5,
+    "type": "income",
+    "name": "wypłata",
+    "amount": 1500,
+    "userId": "2",
+    "categoryId": "5",
+    "date": "2021-11-17,10:00"
+  },
+  {
+    "id": 6,
+    "type": "income",
+    "name": "prezent urodzinowy",
+    "amount": 60,
+    "userId": "1",
+    "categoryId": "5",
+    "date": "2021-11-17,10:00"
+  }
+]

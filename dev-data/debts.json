@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "transactionId": 1,
+    "amount": 5,
+    "date": "2020-11-10,11:40",
+    "lenderId": 1,
+    "borrowerId": 2,
+    "paidOff": false
+  },
+  {
+    "id": 2,
+    "transactionId": 1,
+    "amount": 100,
+    "date": "2020-11-10,11:40",
+    "lenderId": 2,
+    "borrowerId": 1,
+    "paidOff": true
+  }
+]
