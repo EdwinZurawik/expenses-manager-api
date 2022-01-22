@@ -4,6 +4,30 @@ const transactions = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/transactions.json`)
 );
 
+exports.checkBody = (req, res, next) => {
+  requiredKeys = ['name', 'amount'];
+  for (key of requiredKeys) {
+    if (!(key in req.body)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: `"${key}" attribute is required!`,
+      });
+    }
+  }
+  next();
+};
+
+exports.checkId = (req, res, next, val) => {
+  transaction = transactions.find((el) => el.id === +val);
+  if (!transaction) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+  next();
+};
+
 exports.getAllTransactions = (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -15,22 +39,13 @@ exports.getAllTransactions = (req, res) => {
 };
 
 exports.getTransaction = (req, res) => {
-  const id = +req.params.id;
-  transaction = transactions.find((el) => el.id === id);
-
-  if (!transaction) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  } else {
-    res.status(200).json({
-      status: 'success',
-      data: {
-        transaction,
-      },
-    });
-  }
+  transaction = transactions.find((el) => el.id === +req.params.id);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      transaction,
+    },
+  });
 };
 
 exports.createTransaction = (req, res) => {
@@ -54,7 +69,6 @@ exports.createTransaction = (req, res) => {
 };
 
 exports.updateTransaction = (req, res) => {
-  // Check if transaction with given id exists...
   res.status(200).json({
     status: 'success',
     data: {
@@ -64,7 +78,6 @@ exports.updateTransaction = (req, res) => {
 };
 
 exports.deleteTransaction = (req, res) => {
-  // Check if transaction with given id exists...
   res.status(204).json({
     status: 'success',
     data: null,
