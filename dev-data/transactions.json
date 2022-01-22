@@ -43,14 +43,5 @@
     "userId": "2",
     "categoryId": "5",
     "date": "2021-11-17,10:00"
-  },
-  {
-    "id": 6,
-    "type": "income",
-    "name": "prezent urodzinowy",
-    "amount": 60,
-    "userId": "1",
-    "categoryId": "5",
-    "date": "2021-11-17,10:00"
   }
 ]
