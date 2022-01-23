@@ -6,10 +6,7 @@ const router = express.Router();
 router
   .route('/')
   .get(transactionController.getAllTransactions)
-  .post(
-    transactionController.checkBody,
-    transactionController.createTransaction
-  );
+  .post(transactionController.createTransaction);
 router
   .route('/:id')
   .get(transactionController.getTransaction)

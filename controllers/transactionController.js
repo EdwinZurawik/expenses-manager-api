@@ -1,58 +1,90 @@
 const Transaction = require('../models/transactionModel');
 
-exports.checkBody = (req, res, next) => {
-  // requiredKeys = ['name', 'amount'];
-  // for (key of requiredKeys) {
-  //   if (!(key in req.body)) {
-  //     return res.status(400).json({
-  //       status: 'fail',
-  //       message: `"${key}" attribute is required!`,
-  //     });
-  //   }
-  // }
-  next();
+exports.getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.find();
+    res.status(200).json({
+      status: 'success',
+      results: transactions.length,
+      data: {
+        transactions,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
-exports.getAllTransactions = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    // results: transactions.length,
-    // data: {
-    //   transactions,
-    // },
-  });
+exports.getTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.findById(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        transaction,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
-exports.getTransaction = (req, res) => {
-  res.status(200).json({
-    // status: 'success',
-    // data: {
-    //   transaction,
-    // },
-  });
+exports.createTransaction = async (req, res) => {
+  try {
+    const newTransaction = await Transaction.create(req.body);
+    res.status(201).json({
+      status: 'success',
+      data: {
+        transaction: newTransaction,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
-exports.createTransaction = (req, res) => {
-  res.status(201).json({
-    // status: 'success',
-    // data: {
-    //   transaction: newTransaction,
-    // },
-  });
+exports.updateTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({
+      status: 'success',
+      data: {
+        transaction,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
-exports.updateTransaction = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      transaction: 'Updated transaction here!',
-    },
-  });
-};
-
-exports.deleteTransaction = (req, res) => {
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
+exports.deleteTransaction = async (req, res) => {
+  try {
+    await Transaction.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
