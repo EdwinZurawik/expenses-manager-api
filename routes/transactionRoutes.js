@@ -3,8 +3,6 @@ const transactionController = require('../controllers/transactionController');
 
 const router = express.Router();
 
-router.param('id', transactionController.checkId);
-
 router
   .route('/')
   .get(transactionController.getAllTransactions)
