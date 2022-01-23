@@ -12,3 +12,8 @@ To run application use:
 ## Logging
 
 Morgan middleware used for logging is active only in **development** mode
+
+## Importing dev-data
+
+1. `node dev-data/data/import-dev-data.js --import` - to import data into db
+1. `node dev-data/data/import-dev-data.js --delete` - to delete data from db
