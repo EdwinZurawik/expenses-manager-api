@@ -1,8 +1,22 @@
 const Transaction = require('../models/transactionModel');
+const APIFeatures = require('../utils/apiFeatures');
+
+exports.aliasTopExpenses = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-amount,-date';
+  req.query.type = 'expense';
+  req.query.fields = 'name,type,amount,date';
+  next();
+};
 
 exports.getAllTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find();
+    const features = new APIFeatures(Transaction.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const transactions = await features.query;
     res.status(200).json({
       status: 'success',
       results: transactions.length,
