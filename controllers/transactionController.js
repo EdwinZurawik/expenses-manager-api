@@ -102,3 +102,31 @@ exports.deleteTransaction = async (req, res) => {
     });
   }
 };
+
+exports.getTransactionStats = async (req, res) => {
+  try {
+    const stats = await Transaction.aggregate([
+      // {
+      //   $match: { createdAt: { $lte: Date.now() } },
+      // },
+      {
+        $group: {
+          _id: '$type',
+          sumAmount: { $sum: '$amount' },
+          countOperations: { $sum: 1 },
+          maxAmount: { $max: '$amount' },
+          minAmount: { $min: '$amount' },
+        },
+      },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      stats,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
