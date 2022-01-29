@@ -3,6 +3,8 @@ const transactionController = require('../controllers/transactionController');
 
 const router = express.Router();
 
+router.route('/stats').get(transactionController.getTransactionStats);
+
 router
   .route('/top-5-expenses')
   .get(
