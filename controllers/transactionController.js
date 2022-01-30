@@ -130,3 +130,59 @@ exports.getTransactionStats = async (req, res) => {
     });
   }
 };
+
+exports.getMonthlyReport = async (req, res) => {
+  const year = req.query.year * 1;
+  try {
+    const report = await Transaction.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$date' },
+          expensesCount: {
+            $sum: { $cond: [{ $eq: ['$type', 'expense'] }, 1, 0] },
+          },
+          incomesCount: {
+            $sum: { $cond: [{ $eq: ['$type', 'income'] }, 1, 0] },
+          },
+          expensesSum: {
+            $sum: { $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0] },
+          },
+          incomesSum: {
+            $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] },
+          },
+        },
+      },
+      {
+        $addFields: {
+          month: '$_id',
+          balance: { $subtract: ['$incomesSum', '$expensesSum'] },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        report,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
