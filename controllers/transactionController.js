@@ -1,5 +1,6 @@
 const Transaction = require('../models/transactionModel');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 exports.aliasTopExpenses = (req, res, next) => {
@@ -29,6 +30,10 @@ exports.getAllTransactions = catchAsync(async (req, res, next) => {
 exports.getTransaction = catchAsync(async (req, res, next) => {
   const transaction = await Transaction.findById(req.params.id);
 
+  if (!transaction) {
+    return next(new AppError('No transaction found with that ID', 404));
+  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -53,6 +58,11 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
     req.body,
     { new: true, runValidators: true }
   );
+
+  if (!transaction) {
+    return next(new AppError('No transaction found with that ID', 404));
+  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -62,7 +72,13 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteTransaction = catchAsync(async (req, res, next) => {
-  await Transaction.findByIdAndDelete(req.params.id);
+  const transaction = await Transaction.findByIdAndDelete(req.params.id);
+  console.log(transaction);
+
+  if (!transaction) {
+    return next(new AppError('No transaction found with that ID', 404));
+  }
+
   res.status(204).json({
     status: 'success',
     data: null,
