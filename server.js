@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-// Read env variables before importin app
+
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+  console.log('UNCAUGHT EXCEPTION! Shutting down...');
+  process.exit(1);
+});
+
+// Read env variables before importing app
 dotenv.config({ path: './.env' });
 
 const app = require('./app');
@@ -16,6 +23,12 @@ mongoose
   .then(() => console.log('MONGO connection successfull!'));
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server listening on port ${port}...`);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  console.log('UNHANDLED REJECTION! Shutting down...');
+  server.close(() => process.exit(1));
 });

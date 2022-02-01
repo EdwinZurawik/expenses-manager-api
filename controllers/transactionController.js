@@ -1,5 +1,7 @@
 const Transaction = require('../models/transactionModel');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 
 exports.aliasTopExpenses = (req, res, next) => {
   req.query.limit = '5';
@@ -9,180 +11,146 @@ exports.aliasTopExpenses = (req, res, next) => {
   next();
 };
 
-exports.getAllTransactions = async (req, res) => {
-  try {
-    const features = new APIFeatures(Transaction.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-    const transactions = await features.query;
-    res.status(200).json({
-      status: 'success',
-      results: transactions.length,
-      data: {
-        transactions,
+exports.getAllTransactions = catchAsync(async (req, res, next) => {
+  const features = new APIFeatures(Transaction.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  const transactions = await features.query;
+  res.status(200).json({
+    status: 'success',
+    results: transactions.length,
+    data: {
+      transactions,
+    },
+  });
+});
+
+exports.getTransaction = catchAsync(async (req, res, next) => {
+  const transaction = await Transaction.findById(req.params.id);
+
+  if (!transaction) {
+    return next(new AppError('No transaction found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      transaction,
+    },
+  });
+});
+
+exports.createTransaction = catchAsync(async (req, res, next) => {
+  const newTransaction = await Transaction.create(req.body);
+  res.status(201).json({
+    status: 'success',
+    data: {
+      transaction: newTransaction,
+    },
+  });
+});
+
+exports.updateTransaction = catchAsync(async (req, res, next) => {
+  const transaction = await Transaction.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
+
+  if (!transaction) {
+    return next(new AppError('No transaction found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      transaction,
+    },
+  });
+});
+
+exports.deleteTransaction = catchAsync(async (req, res, next) => {
+  const transaction = await Transaction.findByIdAndDelete(req.params.id);
+  console.log(transaction);
+
+  if (!transaction) {
+    return next(new AppError('No transaction found with that ID', 404));
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+exports.getTransactionStats = catchAsync(async (req, res, next) => {
+  const stats = await Transaction.aggregate([
+    // {
+    //   $match: { createdAt: { $lte: Date.now() } },
+    // },
+    {
+      $group: {
+        _id: '$type',
+        sumAmount: { $sum: '$amount' },
+        countOperations: { $sum: 1 },
+        maxAmount: { $max: '$amount' },
+        minAmount: { $min: '$amount' },
       },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+    },
+  ]);
+  res.status(200).json({
+    status: 'success',
+    stats,
+  });
+});
 
-exports.getTransaction = async (req, res) => {
-  try {
-    const transaction = await Transaction.findById(req.params.id);
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        transaction,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.createTransaction = async (req, res) => {
-  try {
-    const newTransaction = await Transaction.create(req.body);
-    res.status(201).json({
-      status: 'success',
-      data: {
-        transaction: newTransaction,
-      },
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.updateTransaction = async (req, res) => {
-  try {
-    const transaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    res.status(200).json({
-      status: 'success',
-      data: {
-        transaction,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.deleteTransaction = async (req, res) => {
-  try {
-    await Transaction.findByIdAndDelete(req.params.id);
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.getTransactionStats = async (req, res) => {
-  try {
-    const stats = await Transaction.aggregate([
-      // {
-      //   $match: { createdAt: { $lte: Date.now() } },
-      // },
-      {
-        $group: {
-          _id: '$type',
-          sumAmount: { $sum: '$amount' },
-          countOperations: { $sum: 1 },
-          maxAmount: { $max: '$amount' },
-          minAmount: { $min: '$amount' },
-        },
-      },
-    ]);
-    res.status(200).json({
-      status: 'success',
-      stats,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.getMonthlyReport = async (req, res) => {
+exports.getMonthlyReport = catchAsync(async (req, res, next) => {
   const year = req.query.year * 1;
-  try {
-    const report = await Transaction.aggregate([
-      {
-        $match: {
-          date: {
-            $gte: new Date(`${year}-01-01`),
-            $lte: new Date(`${year}-12-31`),
-          },
+  const report = await Transaction.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: new Date(`${year}-01-01`),
+          $lte: new Date(`${year}-12-31`),
         },
       },
-      {
-        $group: {
-          _id: { $month: '$date' },
-          expensesCount: {
-            $sum: { $cond: [{ $eq: ['$type', 'expense'] }, 1, 0] },
-          },
-          incomesCount: {
-            $sum: { $cond: [{ $eq: ['$type', 'income'] }, 1, 0] },
-          },
-          expensesSum: {
-            $sum: { $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0] },
-          },
-          incomesSum: {
-            $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] },
-          },
+    },
+    {
+      $group: {
+        _id: { $month: '$date' },
+        expensesCount: {
+          $sum: { $cond: [{ $eq: ['$type', 'expense'] }, 1, 0] },
+        },
+        incomesCount: {
+          $sum: { $cond: [{ $eq: ['$type', 'income'] }, 1, 0] },
+        },
+        expensesSum: {
+          $sum: { $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0] },
+        },
+        incomesSum: {
+          $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] },
         },
       },
-      {
-        $addFields: {
-          month: '$_id',
-          balance: { $subtract: ['$incomesSum', '$expensesSum'] },
-        },
+    },
+    {
+      $addFields: {
+        month: '$_id',
+        balance: { $subtract: ['$incomesSum', '$expensesSum'] },
       },
-      {
-        $project: {
-          _id: 0,
-        },
+    },
+    {
+      $project: {
+        _id: 0,
       },
-    ]);
+    },
+  ]);
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        report,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    data: {
+      report,
+    },
+  });
+});
