@@ -2,6 +2,14 @@
 
 Backend application for Expenses Manager
 
+## Preparing environment
+
+Before running application make sure to:
+
+1. `npm install` in the project directory to install all dependencies
+1. `node dev-data/copy-env.js` to copy **.env.dist** file to **.env**
+1. Fill all missing environment variables in the **.env** file
+
 ## Running application
 
 To run application use:
