@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const accountSchema = new mongoose.Schema({
   username: {
@@ -18,7 +19,7 @@ const accountSchema = new mongoose.Schema({
     unique: [true, 'An email assigned to an account must be unique'],
     validate: {
       validator: validator.isEmail,
-      message: (props) => `${props.value} is not a valid email`,
+      message: 'Please provide a valid email',
     },
   },
   createdAt: {
@@ -34,7 +35,25 @@ const accountSchema = new mongoose.Schema({
   passwordConfirm: {
     type: String,
     required: [true, 'Please confirm your password'],
+    validate: {
+      // This only works on CREATE and SAVE!!!
+      validator: function (el) {
+        return el === this.password;
+      },
+      message: 'Passwords are not the same',
+    },
   },
+});
+
+accountSchema.pre('save', async function (next) {
+  // Run function only when password modified
+  if (!this.isModified('password')) return next();
+
+  // hash the password with the cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+  // remove passwordConfirm
+  this.passwordConfirm = undefined;
+  next();
 });
 
 const Account = mongoose.model('Account', accountSchema);
