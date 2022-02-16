@@ -23,6 +23,10 @@ router
   .route('/:id')
   .get(transactionController.getTransaction)
   .patch(transactionController.updateTransaction)
-  .delete(transactionController.deleteTransaction);
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin'),
+    transactionController.deleteTransaction
+  );
 
 module.exports = router;
