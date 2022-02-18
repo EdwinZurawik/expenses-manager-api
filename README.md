@@ -17,3 +17,8 @@ Morgan middleware used for logging is active only in **development** mode
 
 1. `node dev-data/data/import-dev-data.js --import` - to import data into db
 1. `node dev-data/data/import-dev-data.js --delete` - to delete data from db
+
+## Development
+
+1. Clone project with: `git@github.com:EdwinZurawik/expenses-manager-api.git`
+1. Run `docker-compose up -d --build` to start containers.
