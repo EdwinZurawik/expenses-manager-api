@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const Account = require('../models/accountModel');
@@ -11,6 +12,18 @@ const signToken = function (id) {
   });
 };
 
+const createAndSendToken = (account, statusCode, res) => {
+  const token = signToken(account._id);
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      account,
+    },
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newAccount = await Account.create({
     username: req.body.username,
@@ -19,15 +32,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  const token = signToken(newAccount._id);
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      account: newAccount,
-    },
-  });
+  createAndSendToken(newAccount, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -46,12 +51,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password!', 401));
   }
 
-  const token = signToken(account._id);
-
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createAndSendToken(account, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -145,4 +145,43 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
-exports.resetPassword = catchAsync(async (req, res, next) => {});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const account = await Account.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!account) {
+    return next(new AppError('Token is invalid or has expired.', 404));
+  }
+
+  account.password = req.body.password;
+  account.passwordConfirm = req.body.passwordConfirm;
+  account.passwordResetToken = undefined;
+  account.passwordResetExpires = undefined;
+  await account.save();
+
+  createAndSendToken(account, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const account = await Account.findById(req.account._id).select('+password');
+
+  if (
+    !req.body.currentPassword ||
+    !(await account.correctPassword(req.body.currentPassword, account.password))
+  ) {
+    return next(new AppError('Incorrect password. Please try again.', 401));
+  }
+
+  account.password = req.body.password;
+  account.passwordConfirm = req.body.passwordConfirm;
+  await account.save();
+
+  createAndSendToken(account, 200, res);
+});
