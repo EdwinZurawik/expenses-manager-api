@@ -16,6 +16,10 @@ router.patch(
   authController.updatePassword
 );
 
-router.patch('/updateMe', authController.protect, accountController.updateMe);
+router.patch('/myAccount', authController.protect, accountController.updateMe);
+router.delete('/myAccount', authController.protect, accountController.deleteMe);
+
+router.get('/accounts', accountController.getAllAccounts);
+router.get('/accounts/:id', accountController.getAccount);
 
 module.exports = router;
