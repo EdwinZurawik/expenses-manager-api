@@ -1,5 +1,6 @@
 const express = require('express');
 const authController = require('../controllers/authController');
+const accountController = require('../controllers/accountController');
 
 const router = express.Router();
 
@@ -14,5 +15,7 @@ router.patch(
   authController.protect,
   authController.updatePassword
 );
+
+router.patch('/updateMe', authController.protect, accountController.updateMe);
 
 module.exports = router;
