@@ -1,11 +1,13 @@
 const fs = require('fs');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const Transaction = require('../../models/transactionModel');
+const Transaction = require('../models/transactionModel');
+
 // Read env variables before importin app
 dotenv.config({ path: './.env' });
 
 const DB = process.env.MONGO.replace('<PASSWORD>', process.env.MONGO_PASSWORD);
+console.log(DB);
 
 mongoose
   .connect(DB, {
@@ -18,10 +20,10 @@ mongoose
 // READ JSON FILE
 
 const transactions = JSON.parse(
-  fs.readFileSync(`${__dirname}/transactions.json`, 'utf-8')
+  fs.readFileSync(`${__dirname}/data/transactions.json`, 'utf-8')
 );
 
-// IMPORT DATA INTO DBg
+// IMPORT DATA INTO DB
 
 const importData = async () => {
   try {
