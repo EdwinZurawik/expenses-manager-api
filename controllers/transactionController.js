@@ -73,7 +73,6 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
 
 exports.deleteTransaction = catchAsync(async (req, res, next) => {
   const transaction = await Transaction.findByIdAndDelete(req.params.id);
-  console.log(transaction);
 
   if (!transaction) {
     return next(new AppError('No transaction found with that ID', 404));
