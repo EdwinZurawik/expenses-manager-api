@@ -15,6 +15,8 @@ const accountRouter = require('./routes/accountRoutes');
 
 const app = express();
 
+app.enable('trust proxy');
+
 // Set security HTTP Headers
 app.use(helmet());
 
