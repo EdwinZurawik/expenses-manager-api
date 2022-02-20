@@ -16,10 +16,27 @@ router.patch(
   authController.updatePassword
 );
 
-router.patch('/myAccount', authController.protect, accountController.updateMe);
-router.delete('/myAccount', authController.protect, accountController.deleteMe);
+router.use(authController.protect);
 
-router.get('/accounts', accountController.getAllAccounts);
-router.get('/accounts/:id', accountController.getAccount);
+router
+  .route('/myAccount')
+  .get(
+    authController.protect,
+    accountController.getMe,
+    accountController.getAccount
+  )
+  .patch(authController.protect, accountController.updateMe)
+  .delete(authController.protect, accountController.deleteMe);
+
+router.use(authController.restrictTo('admin'));
+router
+  .route('/accounts')
+  .get(accountController.getAllAccounts)
+  .post(accountController.createAccount);
+router
+  .route('/accounts/:id')
+  .delete(accountController.deleteAccount)
+  .patch(accountController.updateAccount)
+  .get(accountController.getAccount);
 
 module.exports = router;

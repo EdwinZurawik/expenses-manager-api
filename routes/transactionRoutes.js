@@ -4,6 +4,8 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+router.use(authController.protect);
+
 router.route('/monthly-report').get(transactionController.getMonthlyReport);
 
 router.route('/stats').get(transactionController.getTransactionStats);
@@ -17,16 +19,12 @@ router
 
 router
   .route('/')
-  .get(authController.protect, transactionController.getAllTransactions)
+  .get(transactionController.getAllTransactions)
   .post(transactionController.createTransaction);
 router
   .route('/:id')
   .get(transactionController.getTransaction)
   .patch(transactionController.updateTransaction)
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin'),
-    transactionController.deleteTransaction
-  );
+  .delete(transactionController.deleteTransaction);
 
 module.exports = router;

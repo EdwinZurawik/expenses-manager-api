@@ -24,10 +24,20 @@ const transactionSchema = new mongoose.Schema({
       message: 'A transaction type can be either "expense" or "income"',
     },
   },
-  categoryId: mongoose.Types.ObjectId,
-  userId: {
+  category: {
     type: mongoose.Types.ObjectId,
+    ref: 'Category',
+    required: [true, 'A transaction must have a category'],
+  },
+  user: {
+    type: mongoose.Types.ObjectId,
+    ref: 'User',
     required: [true, 'A transaction must have a user'],
+  },
+  accountId: {
+    type: mongoose.Types.ObjectId,
+    ref: 'Account',
+    required: [true, 'A transaction must belong to an account'],
   },
   description: {
     type: String,
@@ -47,6 +57,12 @@ const transactionSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'A transaction must have a transaction date'],
   },
+});
+
+transactionSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'category', select: '-__v -accountId' });
+  this.populate({ path: 'user', select: '-__v -accountId' });
+  next();
 });
 
 // DOCUMENT MIDDLEWARE - runs before .save() and .create() commands

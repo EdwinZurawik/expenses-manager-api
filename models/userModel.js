@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
     required: [true, 'A user must have a name'],
-    unique: [true, 'A user name must be unique'],
     maxlength: [255, 'A user name must have less or equal to 255 characters'],
     minlength: [3, 'A user name must have at least 3 characters'],
   },
@@ -25,6 +24,7 @@ const userSchema = new mongoose.Schema({
   },
   accountId: {
     type: mongoose.Types.ObjectId,
+    ref: 'Account',
     required: [true, 'A user must be assigned to an account'],
   },
 });

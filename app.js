@@ -13,6 +13,7 @@ const globalErrorHandler = require('./controllers/errorController');
 const transactionRouter = require('./routes/transactionRoutes');
 const userRouter = require('./routes/userRoutes');
 const accountRouter = require('./routes/accountRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 
 const app = express();
 
@@ -62,9 +63,10 @@ app.use(express.static(`${__dirname}/public`));
 // Compress text sent to the client
 app.use(compression());
 
-app.use('/api/v1', accountRouter);
 app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1', accountRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
