@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -14,8 +15,16 @@ const transactionRouter = require('./routes/transactionRoutes');
 const userRouter = require('./routes/userRoutes');
 const accountRouter = require('./routes/accountRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
+const billRouter = require('./routes/billRoutes');
+const debtRouter = require('./routes/debtRoutes');
 
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.enable('trust proxy');
 
@@ -57,16 +66,19 @@ app.use(
   })
 );
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
-
 // Compress text sent to the client
 app.use(compression());
+
+app.get('/', (req, res) => {
+  res.status(200).render('base');
+});
 
 app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/categories', categoryRouter);
-app.use('/api/v1', accountRouter);
+app.use('/api/v1/bills', billRouter);
+app.use('/api/v1/debts', debtRouter);
+app.use('/api/v1/accounts', accountRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

@@ -30,11 +30,11 @@ router
 
 router.use(authController.restrictTo('admin'));
 router
-  .route('/accounts')
+  .route('/')
   .get(accountController.getAllAccounts)
   .post(accountController.createAccount);
 router
-  .route('/accounts/:id')
+  .route('/:id')
   .delete(accountController.deleteAccount)
   .patch(accountController.updateAccount)
   .get(accountController.getAccount);
