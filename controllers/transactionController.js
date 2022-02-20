@@ -1,7 +1,6 @@
 const Transaction = require('../models/transactionModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 exports.aliasTopExpenses = (req, res, next) => {
   req.query.limit = '5';
@@ -11,78 +10,11 @@ exports.aliasTopExpenses = (req, res, next) => {
   next();
 };
 
-exports.getAllTransactions = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Transaction.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const transactions = await features.query;
-  res.status(200).json({
-    status: 'success',
-    results: transactions.length,
-    data: {
-      transactions,
-    },
-  });
-});
-
-exports.getTransaction = catchAsync(async (req, res, next) => {
-  const transaction = await Transaction.findById(req.params.id);
-
-  if (!transaction) {
-    return next(new AppError('No transaction found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      transaction,
-    },
-  });
-});
-
-exports.createTransaction = catchAsync(async (req, res, next) => {
-  const newTransaction = await Transaction.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      transaction: newTransaction,
-    },
-  });
-});
-
-exports.updateTransaction = catchAsync(async (req, res, next) => {
-  const transaction = await Transaction.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true }
-  );
-
-  if (!transaction) {
-    return next(new AppError('No transaction found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      transaction,
-    },
-  });
-});
-
-exports.deleteTransaction = catchAsync(async (req, res, next) => {
-  const transaction = await Transaction.findByIdAndDelete(req.params.id);
-
-  if (!transaction) {
-    return next(new AppError('No transaction found with that ID', 404));
-  }
-
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+exports.getAllTransactions = factory.getAll(Transaction);
+exports.getTransaction = factory.getOne(Transaction);
+exports.createTransaction = factory.createOne(Transaction);
+exports.updateTransaction = factory.updateOne(Transaction);
+exports.deleteTransaction = factory.deleteOne(Transaction);
 
 exports.getTransactionStats = catchAsync(async (req, res, next) => {
   const stats = await Transaction.aggregate([
