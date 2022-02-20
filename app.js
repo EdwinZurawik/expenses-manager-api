@@ -15,6 +15,8 @@ const transactionRouter = require('./routes/transactionRoutes');
 const userRouter = require('./routes/userRoutes');
 const accountRouter = require('./routes/accountRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
+const billRouter = require('./routes/billRoutes');
+const debtRouter = require('./routes/debtRoutes');
 
 const app = express();
 
@@ -74,6 +76,8 @@ app.get('/', (req, res) => {
 app.use('/api/v1/transactions', transactionRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/bills', billRouter);
+app.use('/api/v1/debts', debtRouter);
 app.use('/api/v1/accounts', accountRouter);
 
 app.all('*', (req, res, next) => {
